@@ -6,7 +6,9 @@ using UnityEngine;
 public class UIManager : MonoBehaviour
 {
     public GameObject navigationCanvasPrefab;
+
     private static UIManager instance;
+    private PlayerManager playerManager;
 
     void Awake()
     {

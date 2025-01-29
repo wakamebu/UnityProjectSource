@@ -99,7 +99,7 @@ public class SkillAcquisitionUI : MonoBehaviour
         {
             if (attributeButtons[i] != null)
             {
-                int index = i; // ローカル変数にコピー
+                int index = i; 
                 attributeButtons[i].onClick.AddListener(() => OnAttributeSelected(attributeButtons[index]));
             }
         }

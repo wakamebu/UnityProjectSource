@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.IO;
@@ -64,7 +64,7 @@ public class StandaloneUpdater : MonoBehaviour
         UnityWebRequest request = UnityWebRequest.Get(versionUrl);
         UnityEngine.Debug.Log("Update URL: " + versionUrl);
         
-        // 証明書の検証を無効化(SSLが有効ならばスルーする)
+        // 証明書の検証を無効化(SSLが有効ならばスルーする)(無料サーバーにSSLがないため、更新までは少なくとも使用)
         request.certificateHandler = new BypassCertificateHandler();
 
         yield return request.SendWebRequest();
@@ -82,7 +82,7 @@ public class StandaloneUpdater : MonoBehaviour
             {
                 UnityEngine.Debug.Log($"New version available: {serverVersion.version}");
                 UnityEngine.Debug.Log("Downloading update from URL: " + serverVersion.url);
-                StartCoroutine(DownloadAndApplyUpdate(serverVersion.url));
+                StartPowershell(serverVersion.url);
             }
             else
             {
@@ -91,7 +91,48 @@ public class StandaloneUpdater : MonoBehaviour
         }
     }
 
+    //ファイルロックが発生するため、Powershellを起動する
+    void StartPowershell(string updateUrl)
+    {
+        string scriptPath = Path.Combine(Application.dataPath, "..", "Updater", "UpdateScript.ps1");
+        UnityEngine.Debug.Log("scriptPath is " + scriptPath);
+
+        string installDir = Path.Combine(Application.dataPath, ".."); 
+        UnityEngine.Debug.Log("installDir is " + installDir);
+
+        string gameExe    = Application.productName + ".exe";
+
+        string arguments = string.Format(
+        "-NoExit -File \"{0}\" \"{1}\" \"{2}\" \"{3}\"",
+        scriptPath,
+        updateUrl,
+        installDir,
+        gameExe
+        );
+
+        ProcessStartInfo startInfo = new ProcessStartInfo
+        {
+            FileName = "powershell.exe",
+            Arguments = arguments,
+            UseShellExecute = true 
+        };
+
+        Process.Start(startInfo);
+        //StartCoroutine(WaitAndQuit(3f));
+    }
+
+    IEnumerator WaitAndQuit(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+
+        // ログを出してアプリケーション終了
+        UnityEngine.Debug.Log("Wait complete. Now quitting...");
+        Application.Quit();
+    }
+    //以下、過去に使用していたものたち
+
     // 更新ファイルをダウンロードして適用する
+    /*
     IEnumerator DownloadAndApplyUpdate(string updateUrl)
     {
         NotifyRestart();
@@ -141,7 +182,6 @@ public class StandaloneUpdater : MonoBehaviour
     // 更新完了をユーザーに通知する
     void NotifyRestart()
     {
-        // シンプルなUIを表示する
         GameObject canvas = new GameObject("RestartNotificationCanvas");
         Canvas c = canvas.AddComponent<Canvas>();
         c.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -162,15 +202,14 @@ public class StandaloneUpdater : MonoBehaviour
         textRt.sizeDelta = new Vector2(380, 180);
         textRt.localPosition = Vector3.zero;
 
-        // TextMesh Pro のテキストコンポーネントを追加
+        //テキストコンポーネントを追加
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
         text.text = "更新があります。アプリケーションが再起動するまでお待ちください。";
         text.alignment = TextAlignmentOptions.Center;
         text.color = Color.red;
-        text.fontSize = 20; // 必要に応じてフォントサイズを設定
+        text.fontSize = 20; // 適当に大きめのフォントサイズを指定中。問題があれば必要に応じて下げる
 
-        // フォントアセットをロードして適用
-        // フォントアセットは Resources フォルダ内に配置する必要があります
+
         TMP_FontAsset customFont = Resources.Load<TMP_FontAsset>("Fonts/SourceHanSansJP-Bold SDF");
         if (customFont != null)
         {
@@ -180,7 +219,7 @@ public class StandaloneUpdater : MonoBehaviour
         {
             UnityEngine.Debug.LogError("フォントアセットが見つかりませんでした。パスとファイル名を確認してください。");
         }
-    }
+    }*/
 
     // 証明書の検証を無効化するハンドラ
     private class BypassCertificateHandler : CertificateHandler
