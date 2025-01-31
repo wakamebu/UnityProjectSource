@@ -6,4 +6,5 @@ using UnityEngine;
 public class PlayerDataScriptableObject : ScriptableObject
 {
     public PlayerData playerData;
+    public Sprite characterSprite;
 }

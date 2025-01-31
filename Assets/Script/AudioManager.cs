@@ -12,7 +12,7 @@ public class AudioManager : MonoBehaviour
 
     public AudioClip topPageBGM; // 一旦特定のBGMをtopで流すことにする
 
-    private float bgmVolume = 1.0f; // BGMの音量（0.0〜1.0）
+    private float bgmVolume = 0.5f; // BGMの音量（0.0〜1.0）
     private string currentBGMName;
 
     private bool isRandom = false; // ランダム再生フラグ

@@ -34,6 +34,8 @@ public class PlayerManager : MonoBehaviour
             Debug.Log("プレイヤーデータをロードしました");
         }
         else{
+            InitializeNewPlayerData();
+            /*
         for(int i = 0; i < 6; i++)
             {
                 PlayerData playerData = new PlayerData();
@@ -59,7 +61,50 @@ public class PlayerManager : MonoBehaviour
             }
         playerSelectedindex = 0;
         Debug.Log("新しいプレイヤーデータを初期化しました");
-    }}
+        */
+        }
+    }
+
+    public void InitializeNewPlayerData()
+    {
+        UnityEngine.Debug.Log("PlayerData初期化開始");
+        playerDatas.Clear();
+        PlayerDataScriptableObject[] defaultCharacters = Resources.LoadAll<PlayerDataScriptableObject>("character");
+        foreach (var so in defaultCharacters)
+        {
+            PlayerData playerData = new PlayerData();
+            playerData.playerName = so.playerData.playerName;
+            UnityEngine.Debug.Log(playerData.playerName);
+
+            playerData.level = so.playerData.level;
+            playerData.experience = so.playerData.experience;
+            playerData.hp = so.playerData.hp;
+            playerData.mp = so.playerData.mp;
+            playerData.san = so.playerData.san;
+            playerData.strength = so.playerData.strength;
+            playerData.inteligence = so.playerData.inteligence;
+            playerData.dexterity = so.playerData.dexterity;
+            playerData.power = so.playerData.power;
+            playerData.constitution = so.playerData.constitution;
+            playerData.appearance = so.playerData.appearance;
+            playerData.size = so.playerData.size;
+            playerData.education = so.playerData.education;
+
+            playerData.feos = so.playerData.feos;
+            playerData.arts = so.playerData.arts;
+            playerData.cores = so.playerData.cores;
+            playerData.inventory = so.playerData.inventory;
+
+            playerData.equipFeo = "";
+            playerData.equipArts = so.playerData.equipArts;
+            playerData.equipCores = so.playerData.equipCores;
+            
+            playerDatas.Add(playerData);
+        }
+        playerSelectedindex = 0;
+        SavePlayerData();
+        Application.Quit();
+    }
 
     public void SavePlayerData()
     {

@@ -11,10 +11,12 @@ public class FormationSelectScript : MonoBehaviour
     public GameObject mainCanvas;
     public GameObject secondCanvas;
     public RectTransform[] secondCanvasUIElements; //画像とUI
+    public Toggle setSelectCharacter;
 
     public int selectedCharacterIndex;
 
     public FormationCharacterLevelUP formationCharacterLevelUP; 
+    [SerializeField] private CharacterImageSetter characterImageSetter;
 
     private static FormationSelectScript instance;
 
@@ -23,7 +25,7 @@ public class FormationSelectScript : MonoBehaviour
         if(instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
         }
         else if(instance != this)
         {
@@ -45,7 +47,35 @@ public class FormationSelectScript : MonoBehaviour
     {
         selectedCharacterIndex = index;
         Debug.Log(selectedCharacterIndex + "番目のボタンがクリックされました");
+
+        // PlayerManager の選択インデックスを更新
+        PlayerManager.instance.playerSelectedindex = index;
+
+        // PalyerDataGetAndView の表示を更新
+        var viewer = FindObjectOfType<PalyerDataGetAndView>();
+        if (viewer != null && setSelectCharacter != enabled)
+        {
+            viewer.RefreshView();
+        }
+
+        // CharacterImageSetterでSecondCanvasの画像を更新
+        if(characterImageSetter != null)
+        {
+            characterImageSetter.SetCharacterImage(selectedCharacterIndex);
+        }
+
         StartCoroutine(TransitionToSecondCanvas());
+
+        if(PlayerManager.instance != null && PlayerManager.instance.playerDatas.Count > selectedCharacterIndex)
+        {
+            PlayerData playerData = PlayerManager.instance.playerDatas[selectedCharacterIndex];
+            if (formationCharacterLevelUP == null)
+            {
+                formationCharacterLevelUP = FormationCharacterLevelUP.instance;
+            }
+            formationCharacterLevelUP.selectCharaterUpdate(playerData);
+            Debug.Log(playerData.playerName + "の情報を表示します");
+        }
     }
 
     public void CloseSecondCanvas()
@@ -95,9 +125,6 @@ public class FormationSelectScript : MonoBehaviour
             delay += 0.1f; // 次の要素のアニメーションを少し遅らせる
         }
 
-        PlayerData playerData = PlayerManager.instance.playerDatas[selectedCharacterIndex];
-        formationCharacterLevelUP = FormationCharacterLevelUP.instance;
-        formationCharacterLevelUP.selectCharaterUpdate(playerData);
     }
 
 
