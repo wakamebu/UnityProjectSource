@@ -704,5 +704,5 @@ public class FormationCharacterLevelUP : MonoBehaviour
         }
     }
 
-
 }
+
