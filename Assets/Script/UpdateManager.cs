@@ -10,7 +10,7 @@ using System.Diagnostics;
 public class StandaloneUpdater : MonoBehaviour
 {
     // 更新情報のURL
-    private const string versionUrl = "http://fproject.starfree.jp/updates/version.json";
+    private const string versionUrl = "https://fproject02.stars.ne.jp/updates/version.json";
     private string currentVersion;
 
     void Start()
@@ -22,7 +22,7 @@ public class StandaloneUpdater : MonoBehaviour
     //updater起動
     void StartUpdaterAndExit()
     {
-        string updaterPath = Path.Combine(Application.dataPath, "Updater", "Updater.exe");
+        string updaterPath = Path.Combine(Application.dataPath, "..", "Updater", "Updater.exe");
         string updateFilePath = Path.Combine(Application.persistentDataPath, "update.zip");
         string appExePath = Path.Combine(Application.dataPath, "..", Application.productName + ".exe");
         string installDir = Path.Combine(Application.dataPath, "..");
@@ -30,14 +30,14 @@ public class StandaloneUpdater : MonoBehaviour
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = updaterPath;
         startInfo.Arguments = $"\"{updateFilePath}\" \"{appExePath}\" \"{installDir}\"";
-        startInfo.UseShellExecute = false;
+        startInfo.UseShellExecute = true;
 
-        UnityEngine.Debug.Log("startInfo.Arguments is" + startInfo.Arguments);
+        UnityEngine.Debug.Log("Updater is " + updaterPath + " , startInfo.Arguments is" + startInfo.Arguments);
 
         Process.Start(startInfo);
 
         // アプリケーションを終了する
-        Application.Quit();
+        StartCoroutine(WaitAndQuit(3f));
     }
 
     // ローカルのバージョン情報を読み込む
@@ -65,7 +65,7 @@ public class StandaloneUpdater : MonoBehaviour
         UnityEngine.Debug.Log("Update URL: " + versionUrl);
         
         // 証明書の検証を無効化(SSLが有効ならばスルーする)(無料サーバーにSSLがないため、更新までは少なくとも使用)
-        request.certificateHandler = new BypassCertificateHandler();
+        // request.certificateHandler = new BypassCertificateHandler();
 
         yield return request.SendWebRequest();
 
@@ -82,7 +82,7 @@ public class StandaloneUpdater : MonoBehaviour
             {
                 UnityEngine.Debug.Log($"New version available: {serverVersion.version}");
                 UnityEngine.Debug.Log("Downloading update from URL: " + serverVersion.url);
-                StartPowershell(serverVersion.url);
+                StartCoroutine(DownloadAndApplyUpdate(serverVersion.url));
             }
             else
             {
@@ -91,7 +91,8 @@ public class StandaloneUpdater : MonoBehaviour
         }
     }
 
-    //ファイルロックが発生するため、Powershellを起動する
+    /*//ファイルロックが発生するため、Powershellを起動する
+    // ssl導入したため一旦保留
     void StartPowershell(string updateUrl)
     {
         string scriptPath = Path.Combine(Application.dataPath, "..", "Updater", "UpdateScript.ps1");
@@ -120,6 +121,7 @@ public class StandaloneUpdater : MonoBehaviour
         Process.Start(startInfo);
         //StartCoroutine(WaitAndQuit(3f));
     }
+    //*/
 
     IEnumerator WaitAndQuit(float seconds)
     {
@@ -132,23 +134,22 @@ public class StandaloneUpdater : MonoBehaviour
     //以下、過去に使用していたものたち
 
     // 更新ファイルをダウンロードして適用する
-    /*
+    //*//
     IEnumerator DownloadAndApplyUpdate(string updateUrl)
     {
         NotifyRestart();
-        if (updateUrl.StartsWith("https://"))
-        {
-            updateUrl = updateUrl.Replace("https://", "http://");
-        }
-
         UnityWebRequest request = UnityWebRequest.Get(updateUrl);
         string tempFilePath = Path.Combine(Application.persistentDataPath, "update.zip");
-        UnityEngine.Debug.Log("update data from " + tempFilePath);
-        //UnityEngine.Debug.Log("app path is " + Application.dataPath, "..", Application.productName + ".exe");
-        //UnityEngine.Debug.Log("Updater path is " + Application.dataPath, "..", "Updater.exe");
+        UnityEngine.Debug.Log("update data path : " + tempFilePath);
+
+        if(File.Exists(tempFilePath))
+        {
+            UnityEngine.Debug.Log("古いファイル消しときますね～");
+            File.Delete(tempFilePath);
+        }
 
         // 証明書の検証を無効化
-        // request.certificateHandler = new BypassCertificateHandler();
+        //request.certificateHandler = new BypassCertificateHandler();
 
         yield return request.SendWebRequest();
 
@@ -162,7 +163,7 @@ public class StandaloneUpdater : MonoBehaviour
             File.WriteAllBytes(tempFilePath, request.downloadHandler.data);
             UnityEngine.Debug.Log("Update downloaded to " + tempFilePath);
             StartUpdaterAndExit();
-            ApplyUpdate(tempFilePath);
+            //ApplyUpdate(tempFilePath);
         }
     }
 
@@ -207,7 +208,7 @@ public class StandaloneUpdater : MonoBehaviour
         text.text = "更新があります。アプリケーションが再起動するまでお待ちください。";
         text.alignment = TextAlignmentOptions.Center;
         text.color = Color.red;
-        text.fontSize = 20; // 適当に大きめのフォントサイズを指定中。問題があれば必要に応じて下げる
+        text.fontSize = 16; // 適当に大きめのフォントサイズを指定中。問題があれば必要に応じて下げる
 
 
         TMP_FontAsset customFont = Resources.Load<TMP_FontAsset>("Fonts/SourceHanSansJP-Bold SDF");
@@ -219,7 +220,7 @@ public class StandaloneUpdater : MonoBehaviour
         {
             UnityEngine.Debug.LogError("フォントアセットが見つかりませんでした。パスとファイル名を確認してください。");
         }
-    }*/
+    }
 
     // 証明書の検証を無効化するハンドラ
     private class BypassCertificateHandler : CertificateHandler
@@ -229,7 +230,7 @@ public class StandaloneUpdater : MonoBehaviour
             // 常に証明書を信頼する
             return true;
         }
-    }
+    }//*/
 
     // バージョン情報を保持するクラス
     [System.Serializable]

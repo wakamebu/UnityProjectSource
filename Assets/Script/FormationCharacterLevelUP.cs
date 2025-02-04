@@ -415,7 +415,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
 
     public IEnumerator GetTotalGainedSoul(PlayerData playerData)
     {
-        const string expUrl = "http://fproject.starfree.jp/updates/exp.json";
+        const string expUrl = "https://fproject02.stars.ne.jp/updates/exp.json";
         UnityWebRequest request = UnityWebRequest.Get(expUrl);
 
         yield return request.SendWebRequest();
@@ -459,6 +459,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
         }
         
         RecalculateSouls(playerData);
+        RecalcTempUI();
     }
 
     // ボーナスポイントの再計算

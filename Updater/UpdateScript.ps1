@@ -51,9 +51,6 @@ if (Test-Path $TempZipPath) {
     Remove-Item $TempZipPath -Force
 }
 
-
-$UpdateUrl = $UpdateUrl -replace '^https://', 'http://'
-
 Invoke-WebRequest -Uri $UpdateUrl -OutFile $TempZipPath
 
 Write-Host "ダウンロード完了: $TempZipPath"

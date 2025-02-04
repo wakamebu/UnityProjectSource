@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
+using System.IO;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -67,6 +69,13 @@ public class PlayerManager : MonoBehaviour
 
     public void InitializeNewPlayerData()
     {
+        string saveFilePath = Application.persistentDataPath + "/saveData.json";
+        if (File.Exists(saveFilePath))
+        {
+            File.Delete(saveFilePath);
+            Debug.Log("既存のファイルを削除しました: " + saveFilePath);
+        }
+
         UnityEngine.Debug.Log("PlayerData初期化開始");
         playerDatas.Clear();
         PlayerDataScriptableObject[] defaultCharacters = Resources.LoadAll<PlayerDataScriptableObject>("character");
