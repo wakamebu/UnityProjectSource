@@ -27,7 +27,9 @@ public class FormationAbilityButton : MonoBehaviour
         int abilityIndex, 
         PlayerData tempData, 
         PlayerData nowData,
-        Color valueColor)
+        Color valueColor,
+        bool canLevelUpAbility
+    )
     {
         if (data == null || tempData == null || nowData == null)
         {
@@ -43,7 +45,7 @@ public class FormationAbilityButton : MonoBehaviour
 
         characterLevelUP = FormationCharacterLevelUP.instance;
 
-        UpdateUI(valueColor);
+        UpdateUI(valueColor, canLevelUpAbility);
 
         learnButton.onClick.RemoveAllListeners();
         learnButton.onClick.AddListener(() => characterLevelUP.OnClickGetAbility(abilityData));
@@ -55,7 +57,7 @@ public class FormationAbilityButton : MonoBehaviour
         levelDownButton.onClick.AddListener(() => characterLevelUP.OnClickAbilityLevelDown(abilityData));
     }
 
-    void UpdateUI(Color valueColor)
+    void UpdateUI(Color valueColor, bool canLevelUpAbility)
     {
         if (abilityData == null || nowPlayerData == null)
         {
@@ -68,7 +70,7 @@ public class FormationAbilityButton : MonoBehaviour
         growValueText.color = valueColor;
 
         learnButton.gameObject.SetActive(!isLearned);
-        levelUpButton.gameObject.SetActive(isLearned);
+        levelUpButton.gameObject.SetActive(isLearned && canLevelUpAbility);
 
         int nowGrowValue = GetNowGrowValue();
         levelDownButton.gameObject.SetActive(isLearned && growValue > nowGrowValue);

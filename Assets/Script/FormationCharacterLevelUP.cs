@@ -63,6 +63,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
     private int baseMP;
     private int baseSAN;
     private int baseConf;
+    private int remainingTempBonusAbilityPoint;
 
     [SerializeField] private Button levelUpButton;
     [SerializeField] private Button levelDownButton;
@@ -593,8 +594,10 @@ public class FormationCharacterLevelUP : MonoBehaviour
             abilityBonusPointsValue.text = "残りポイント: " + remainAbilityPoints;
         }
 
-        Debug.Log($"[RecalculateAttributeBonusPoints] base:{basePoints}, used:{usedAttributeBonusPoints}, remainAttributePoints:{remainAttributePoints}");
-        Debug.Log($"[RecalculateAbilityBonusPoints] base:{basePoints}, used:{usedAbilityBonusPoints}, remainAbilityPoints:{remainAbilityPoints}");
+        remainingTempBonusAbilityPoint = remainAbilityPoints;
+
+        // Debug.Log($"[RecalculateAttributeBonusPoints] base:{basePoints}, used:{usedAttributeBonusPoints}, remainAttributePoints:{remainAttributePoints}");
+        // Debug.Log($"[RecalculateAbilityBonusPoints] base:{basePoints}, used:{usedAbilityBonusPoints}, remainAbilityPoints:{remainAbilityPoints}");
     }
 
     //level → level+1 に必要なコスト
@@ -706,6 +709,8 @@ public class FormationCharacterLevelUP : MonoBehaviour
     {
         switch (pendingActionType)
         {
+            case PendingActionType.None:
+                break;
             case PendingActionType.LevelUp:
                 ApplyChangesFromTemp();
                 break;
@@ -713,7 +718,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
                 ApplyChangesFromTemp();
                 break;
             case PendingActionType.AcquireAbility:
-                ConfirmAbilityChanges();
+                ApplyChangesFromTemp();
                 break;
             case PendingActionType.AttributeUp:
                 ApplyChangesFromTemp();
@@ -722,11 +727,13 @@ public class FormationCharacterLevelUP : MonoBehaviour
                 ApplyChangesFromTemp();
                 break;
             default:
+                ApplyChangesFromTemp();
                 break;
         }
         HideActionConfirmPanel();
         RecalculateSouls(nowPlayerData);
         RecalcTempUI();
+        RefreshAbilityList();
         playerManager.SavePlayerData();
     }
 
@@ -736,6 +743,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
         nowPlayerData.level = tempPlayerData.level;
         nowPlayerData.usedSoul = tempPlayerData.usedSoul;
         nowPlayerData.usedAttributeBonus = tempPlayerData.usedAttributeBonus;
+        nowPlayerData.usedAbilityBonus = tempPlayerData.usedAbilityBonus;
         Debug.Log($"ApplyChangesFromTemp - After - Experience: {nowPlayerData.experience}, UsedSoul: {nowPlayerData.usedSoul}");
 
         nowPlayerData.bonusStrength = tempPlayerData.bonusStrength;
@@ -753,7 +761,17 @@ public class FormationCharacterLevelUP : MonoBehaviour
         CalculateDexDamageBonus(nowPlayerData.dexterity);
         CalculateIntDamageBonus(nowPlayerData.inteligence);
 
-        nowPlayerData.skillStates = new Dictionary<string, SkillState>(tempPlayerData.skillStates);
+        // スキル状態を更新
+        nowPlayerData.skillStates.Clear();
+        foreach (var kvp in tempPlayerData.skillStates)
+        {
+            SkillState newState = new SkillState
+            {
+                isLearned = kvp.Value.isLearned,
+                growValue = kvp.Value.growValue
+            };
+            nowPlayerData.skillStates[kvp.Key] = newState;
+        }
 
         // PlayerManagerのplayerDatasリスト内のデータも更新
         if (playerManager != null && playerManager.playerDatas != null)
@@ -769,6 +787,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
 
         // 確認後、tempPlayerDataをnowPlayerDataの状態に戻す
         tempPlayerData = new PlayerData(nowPlayerData);
+        InitializeTempData();
     }
 
     public void OnCancelAction()
@@ -1108,6 +1127,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
 
         foreach (var abilityDataSO in abilities)
         {
+            bool canLevelUpAbility = remainingTempBonusAbilityPoint > 0;
             if (abilityDataSO == null) continue;
 
             // tempPlayerDataから現在の状態を取得
@@ -1146,7 +1166,8 @@ public class FormationCharacterLevelUP : MonoBehaviour
                     System.Array.IndexOf(abilities, abilityDataSO),
                     tempPlayerData,
                     nowPlayerData,
-                    valueColor
+                    valueColor,
+                    canLevelUpAbility
                 );
             }
         }
@@ -1379,6 +1400,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
     // 変更を確定するメソッド
     public void ConfirmAbilityChanges()
     {
+        Debug.Log("ConfirmAbilityChanges");
         if (nowPlayerData == null || tempPlayerData == null)
         {
             Debug.LogError("PlayerDataが設定されていません");
@@ -1413,9 +1435,11 @@ public class FormationCharacterLevelUP : MonoBehaviour
             }
         }
 
-        // UIを更新
-        RefreshAbilityList();
+        tempPlayerData = new PlayerData(nowPlayerData);
+        InitializeTempData();
+    
         RecalcTempUI();
+        RefreshAbilityList();
         playerManager.SavePlayerData();
     }
 
