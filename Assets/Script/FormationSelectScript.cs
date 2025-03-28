@@ -43,7 +43,7 @@ public class FormationSelectScript : MonoBehaviour
         }
     }
 
-    void OnCharacterButtonClicked(int index)
+    public async void OnCharacterButtonClicked(int index)
     {
         selectedCharacterIndex = index;
         Debug.Log(selectedCharacterIndex + "番目のボタンがクリックされました");
@@ -66,16 +66,18 @@ public class FormationSelectScript : MonoBehaviour
 
         StartCoroutine(TransitionToSecondCanvas());
 
-        if(PlayerManager.instance != null && PlayerManager.instance.playerDatas.Count > selectedCharacterIndex)
+        PlayerData playerData = PlayerManager.instance.playerDatas[selectedCharacterIndex];
+        if (formationCharacterLevelUP == null)
         {
-            PlayerData playerData = PlayerManager.instance.playerDatas[selectedCharacterIndex];
-            if (formationCharacterLevelUP == null)
-            {
-                formationCharacterLevelUP = FormationCharacterLevelUP.instance;
-            }
-            formationCharacterLevelUP.selectCharaterUpdate(playerData);
-            Debug.Log(playerData.playerName + "の情報を表示します");
+            formationCharacterLevelUP = FormationCharacterLevelUP.instance;
         }
+        // タブを初期化（Statusタブを選択）
+        if (formationCharacterLevelUP.tabToggles != null && formationCharacterLevelUP.tabToggles.Length > 0)
+        {
+            formationCharacterLevelUP.tabToggles[0].isOn = true;
+        }
+        await formationCharacterLevelUP.selectCharaterUpdate(playerData);
+        Debug.Log(playerData.playerName + "の情報を表示します");
     }
 
     public void CloseSecondCanvas()

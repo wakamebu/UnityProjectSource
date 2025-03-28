@@ -2365,6 +2365,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerDatas: []
+  abilityDataSet: {fileID: 11400000, guid: dd7f600d90d44e74d9b186fa0cfc61a9, type: 2}
   playerSelectedindex: 0
 --- !u!4 &905403135
 Transform:
@@ -2394,7 +2395,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterImageUI: {fileID: 0}
-  playerDataCIS: []
+  playerDataCIS:
+  - {fileID: 0}
 --- !u!1 &915807862
 GameObject:
   m_ObjectHideFlags: 0

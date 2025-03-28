@@ -5,7 +5,7 @@ using System.Collections.Generic;
 [System.Serializable]
 public class SaveData
 {
-    public int dataVersion = 1; //本体のバージョンではなく、セーブデータの中身を増やすごとに1増やすデータバージョン変数
+    public int dataVersion = 2; //本体のバージョンではなく、セーブデータの中身を増やすごとに1増やすデータバージョン変数
     public List<PlayerData> playerDatas;
     public int selectedPlayerIndex; //どのキャラクターを選択したプレイヤーかを管理するインデックス
     public SettingData settingData;

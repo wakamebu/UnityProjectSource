@@ -17,11 +17,20 @@ namespace TMPro.Examples
 
         void Awake()
         {
-            // Cache a reference to object's renderer
+            // Renderer コンポーネントを取得
             m_Renderer = GetComponent<Renderer>();
 
-            // Cache a reference to object's material and create an instance by doing so.
-            m_Material = m_Renderer.material;
+            if (m_Renderer != null)
+            {
+                // Renderer が存在する場合のみマテリアルをキャッシュ
+                m_Material = m_Renderer.material;
+            }
+            else
+            {
+                // Renderer が無い場合はエラーメッセージを表示してスクリプトを無効化
+                Debug.LogError("Renderer コンポーネントが見つかりません: " + gameObject.name);
+                enabled = false;
+            }
         }
 
         void Start()
