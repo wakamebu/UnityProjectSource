@@ -186,11 +186,16 @@ public class FormationCharacterLevelUP : MonoBehaviour
 
     private void InitializeTempData()
     {
-        // 必要に応じて追加のデータ初期化処理をここに記述
-        // 例：スキルステートの初期化、ボーナスポイントの計算など
-        tempPlayerData.skillStates = new Dictionary<string, SkillState>(nowPlayerData.skillStates);
-        
-        // ボーナスポイントの初期化を削除（tempPlayerDataは既にnowPlayerDataのコピーなので不要）
+        tempPlayerData.skillStates = new Dictionary<string, SkillState>();
+        foreach (var kvp in nowPlayerData.skillStates)
+        {
+            SkillState copy = new SkillState
+            {
+                isLearned = kvp.Value.isLearned,
+                growValue = kvp.Value.growValue
+            };
+            tempPlayerData.skillStates[kvp.Key] = copy;
+        }
     }
 
     public void ShowActionConfirmPanel(PendingActionType actionType)
@@ -1212,6 +1217,7 @@ public class FormationCharacterLevelUP : MonoBehaviour
         tempPlayerData.usedAbilityBonus++;
 
         // 確認パネルを表示
+        UpdateUIAndCheckChanges();
         ShowActionConfirmPanel(PendingActionType.AbilityLevelUp);
         RefreshAbilityList();
     }
